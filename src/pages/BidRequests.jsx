@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react"
 import { AuthContext } from "../providers/AuthProvider"
-import axios from "axios"
+// import axios from "axios"
 import BidReqTableRow from "../components/BidReqTableRow"
 import toast from "react-hot-toast"
 import useAxiosSecure from "../hooks/useAxiosSecure"
@@ -40,7 +40,7 @@ const BidRequests = () => {
       return console.log('Not Allowed');
 
     try {
-      const { data } = await axios.patch(`${import.meta.env.VITE_API_URL}/bid-status-update/${id}`, { status })
+      const { data } = await axiosSecure.patch(`/bid-status-update/${id}`, { status })
       console.log(data);
       toast.success(`Status changed to ${status} `)
 
