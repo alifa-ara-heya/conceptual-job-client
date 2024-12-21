@@ -1,11 +1,48 @@
+import { useContext, useEffect, useState } from "react"
+import { AuthContext } from "../providers/AuthProvider"
+import axios from "axios"
+import BidTableRow from "../components/BidTableRow"
+
 const MyBids = () => {
+  const { user } = useContext(AuthContext)
+  const [bids, setBids] = useState([])
+  useEffect(() => {
+    fetchAllBids()
+    // eslint-disable-next-line react-hooks/exhaustive-deps 
+  }, [user])
+  const fetchAllBids = async () => {
+    const { data } = await axios.get(
+      `${import.meta.env.VITE_API_URL}/bids/${user?.email}`
+    )
+    setBids(data)
+  }
+  // console.log(bids);
+
+  const handleStatusChange = async (id, prevStatus, status) => {
+    // console.table({ id, prevStatus, status });
+    if (prevStatus !== 'In Progress')
+      return console.log('Not Allowed');
+
+    // in progress এ না থাকলে ও 'mark as complete' করতে পারবে না।
+    try {
+      const { data } = await axios.patch(`${import.meta.env.VITE_API_URL}/bid-status-update/${id}`, { status })
+      console.log(data);
+
+      //refresh ui, so that we get the updated status immediately
+      fetchAllBids()
+    }
+    catch (err) {
+      console.log(err);
+    }
+  }
+
   return (
     <section className='container px-4 mx-auto my-12'>
       <div className='flex items-center gap-x-3'>
         <h2 className='text-lg font-medium text-gray-800 '>My Bids</h2>
 
         <span className='px-3 py-1 text-xs text-blue-600 bg-blue-100 rounded-full '>
-          6 Bid
+          {bids.length}
         </span>
       </div>
 
@@ -61,7 +98,10 @@ const MyBids = () => {
                   </tr>
                 </thead>
                 <tbody className='bg-white divide-y divide-gray-200 '>
-                  <tr>
+                  {
+                    bids.map(bid => <BidTableRow key={bid._id} bid={bid} handleStatusChange={handleStatusChange}></BidTableRow>)
+                  }
+                  {/* <tr>
                     <td className='px-4 py-4 text-sm text-gray-500  whitespace-nowrap'>
                       E-commerce Website Development
                     </td>
@@ -113,7 +153,7 @@ const MyBids = () => {
                         </svg>
                       </button>
                     </td>
-                  </tr>
+                  </tr> */}
                 </tbody>
               </table>
             </div>

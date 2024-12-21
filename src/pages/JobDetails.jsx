@@ -54,7 +54,7 @@ const JobDetails = () => {
     const jobId = _id;
     // const deadline = startDate;
     // console.table({ price, email, comment, deadline });
-    const bidData = { jobId, price, email, comment, deadline: startDate };
+    const bidData = { jobId, price, email, comment, deadline: startDate, title, category, status: 'pending', buyer: buyer?.email };
 
     // 0. Check bid permission validation
     if (user?.email === buyer?.email)

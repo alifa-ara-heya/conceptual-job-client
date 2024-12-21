@@ -11,6 +11,7 @@ import {
   updateProfile,
 } from 'firebase/auth'
 import { app } from '../firebase/firebase.config'
+import axios from 'axios'
 
 export const AuthContext = createContext(null)
 const auth = getAuth(app)
@@ -50,12 +51,39 @@ const AuthProvider = ({ children }) => {
   // onAuthStateChange
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, currentUser => {
-      setUser(currentUser)
-      console.log('CurrentUser-->', currentUser)
-      setLoading(false)
+      setUser(currentUser);
+      console.log('state captured, current user', currentUser);
+
+      if (currentUser?.email) {
+        const user = { email: currentUser.email }
+
+        axios.post(`${import.meta.env.VITE_API_URL}/jwt`, user, {
+          withCredentials: true
+        })
+          .then(res => {
+            console.log('login token', res.data)
+            setLoading(false);
+          })
+          .catch(err => console.error('Error generating token:', err));
+        //make sure to see "login token, success:true" when the user logs in and the token in application tab
+      }
+
+      // when the user logs out, the currentUser becomes null
+      else {
+        axios.post(`${import.meta.env.VITE_API_URL}/logout`, {}, {
+          withCredentials: true,
+        })
+          .then(res => {
+            console.log('logout', res.data)
+            setLoading(false);
+          })
+        //make sure to see "logout, success:true" when the user logs out and no token in application tab
+      }
+
     })
+
     return () => {
-      return unsubscribe()
+      unsubscribe();
     }
   }, [])
 
